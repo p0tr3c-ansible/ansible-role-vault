@@ -1,0 +1,109 @@
+---
+- name: Check if requried variables have been changed
+  fail:
+    msg: "Must provide {{ item.name }}"
+  with_items:
+    - { name: aws_bucket_name, value: "{{ aws_bucket_name }}" }
+    - { name: aws_region, value: "{{ aws_region }}" }
+  when: item.value == "changeme"
+
+- name: Update System
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install misc packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - tmux
+    - vim
+    - wget
+    - unzip
+
+- name: Create local tmp directory if does not exist
+  file:
+    path: "{{ tmp_working_dir }}"
+    state: directory
+    mode: 0770
+
+- name: Download Vault binary
+  get_url:
+    url: "{{ hashicorp_vault_source }}"
+    dest: "{{ tmp_working_dir }}/vault.zip"
+    mode: 0660
+
+- name: Extract vault binary
+  unarchive:
+    src: "{{ tmp_working_dir }}/vault.zip"
+    remote_src: yes
+    dest: /usr/local/sbin/
+    mode: 0755
+
+- name: Add mlock capability
+  capabilities:
+    path: /usr/local/sbin/vault
+    capability: cap_ipc_lock+ep
+    state: present
+
+- name: Create vault user
+  user:
+    name: "{{ vault_user }}"
+    system: yes
+    state: present
+    shell: /usr/bin/false
+
+- name: Create configuration directory
+  file:
+    path: /opt/etc/
+    mode: 0755
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_user }}"
+
+- name: Update hostname
+  hostname:
+    name: "{{ vault_hostname }}"
+  when: vault_hostname is defined
+
+- name: Update local lookup
+  lineinfile:
+    path: /etc/hosts
+    regexp: "{{ vault_hostname }}"
+    line: "{{ ansible_host }}   {{ vault_hostname }}"
+    state: present
+  when: vault_hostname is defined
+
+- name: Create vault etc directory
+  file:
+    path: /opt/etc/vault
+    state: directory
+    mode: 0700
+    owner: "{{ vault_user }}"
+    group: "{{ vault_user }}"
+
+- name: Copy configuration
+  template:
+    src: service.hcl.j2
+    dest: /opt/etc/vault/service.hcl
+    mode: 0700
+    owner: "{{ vault_user }}"
+    group: "{{ vault_user }}"
+
+- name: Deploy SSL
+  include_tasks: deploy_ssl.yml
+  when: vault_tls_enabled == True
+
+- name: Configure systemd service
+  template:
+    src: vault.service.j2
+    dest: /lib/systemd/system/vault.service
+    mode: 0700
+
+- name: Start vault service
+  systemd:
+    name: vault
+    state: started
+    daemon_reload: True
+    enabled: yes

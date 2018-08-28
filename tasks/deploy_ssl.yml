@@ -1,0 +1,11 @@
+- name: Copy vault certificate
+  copy:
+    src: "{{ vault_certificate_file }}"
+    dest: /opt/etc/vault/cert.pem
+    mode: 0700
+
+- name: Copy vault private key
+  copy:
+    src: "{{ vault_private_key_file }}"
+    dest: /opt/etc/vault/key.pem
+    mode: 0700

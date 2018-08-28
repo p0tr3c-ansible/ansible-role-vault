@@ -1,0 +1,30 @@
+# Location of vault download
+tmp_working_dir: "{{ ansible_env.HOME }}/.tmp"
+# Url to vault binary, expected in zip format
+hashicorp_vault_source: https://releases.hashicorp.com/vault/0.10.1/vault_0.10.1_linux_amd64.zip
+
+# Set to FQDN of the host. Optional
+# vault_hostname:
+
+# Enable TLS on Vault API
+vault_tls_enabled: True
+# Certificate location on local system
+vault_certificate_file: "{{ ansible_env.HOME }}/.ssh/cert.pem"
+# Private key location on local system
+vault_private_key_file: "{{ ansible_env.HOME }}/.ssh/key.pem"
+
+# Backend database source
+aws_bucket_name: "changeme"
+# Provide aws region of the bucket
+aws_region: "changeme"
+# AWS access key. OPtional if IAM role is used on ec2
+# aws_access_key: ""
+# AWS secret key. Optional if IAM role is used on ec2
+# aws_secret_key: ""
+
+# IP address of the vault
+vault_address: 0.0.0.0
+# Local port of the vault
+vault_port: 8200
+# Local vault user
+vault_user: vault

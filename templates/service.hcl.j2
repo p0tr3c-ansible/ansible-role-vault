@@ -1,0 +1,21 @@
+storage "s3" {
+    {% if aws_access_key is defined %}
+    access_key  = "{{ aws_access_key }}"
+    {% endif %}
+    {% if aws_secret_key is defined %}
+    secret_key  = "{{ aws_secret_key }}"
+    {% endif %}
+    bucket      = "{{ aws_bucket_name }}"
+    region      = "{{ aws_region }}"
+}
+
+listener "tcp" {
+    address = "{{ vault_address }}:{{ vault_port }}"
+    {% if vault_tls_enabled %}
+    tls_disable = 0
+    tls_cert_file = "./cert.pem"
+    tls_key_file = "./key.pem"
+    {% else %}
+    tls_disable = 1
+    {% endif %}
+}
