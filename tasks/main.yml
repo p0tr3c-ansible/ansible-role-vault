@@ -1,12 +1,4 @@
 ---
-- name: Check if requried variables have been changed
-  fail:
-    msg: "Must provide {{ item.name }}"
-  with_items:
-    - { name: aws_bucket_name, value: "{{ aws_bucket_name }}" }
-    - { name: aws_region, value: "{{ aws_region }}" }
-  when: item.value == "changeme"
-
 - name: Update System
   yum:
     name: '*'
@@ -49,18 +41,18 @@
 
 - name: Create vault user
   user:
-    name: "{{ vault_user }}"
+    name: "{{ vault_system_user }}"
     system: yes
     state: present
     shell: /usr/bin/false
 
 - name: Create configuration directory
   file:
-    path: /opt/etc/
-    mode: 0755
+    path: "{{ vault_config_dir }}"
+    mode: 0750
     state: directory
-    owner: "{{ vault_user }}"
-    group: "{{ vault_user }}"
+    owner: "{{ vault_system_user }}"
+    group: "{{ vault_system_group }}"
 
 - name: Update hostname
   hostname:
@@ -75,21 +67,17 @@
     state: present
   when: vault_hostname is defined
 
-- name: Create vault etc directory
-  file:
-    path: /opt/etc/vault
-    state: directory
-    mode: 0700
-    owner: "{{ vault_user }}"
-    group: "{{ vault_user }}"
+- name: Include filesystem backend config
+  include_tasks: filesystem_backend.yml
+  when: vault_storage_backend == "filesystem"
 
-- name: Copy configuration
+- name: Copy configuration file
   template:
     src: service.hcl.j2
-    dest: /opt/etc/vault/service.hcl
+    dest: "{{ vault_config_dir }}/service.hcl"
     mode: 0700
-    owner: "{{ vault_user }}"
-    group: "{{ vault_user }}"
+    owner: "{{ vault_system_user }}"
+    group: "{{ vault_system_group }}"
 
 - name: Deploy SSL
   include_tasks: deploy_ssl.yml

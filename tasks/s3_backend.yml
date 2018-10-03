@@ -1,0 +1,7 @@
+- name: Check if requried variables have been changed
+  fail:
+    msg: "Must provide {{ item.name }}"
+  with_items:
+    - { name: aws_bucket_name, value: "{{ aws_bucket_name }}" }
+    - { name: aws_region, value: "{{ aws_region }}" }
+  when: item.value == "changeme"

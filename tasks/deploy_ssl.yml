@@ -1,11 +1,13 @@
 - name: Copy vault certificate
   copy:
     src: "{{ vault_certificate_file }}"
-    dest: /opt/etc/vault/cert.pem
+    dest: "{{ vault_config_dir }}/cert.pem"
     mode: 0700
+    owner: "{{ vault_system_user }}"
 
 - name: Copy vault private key
   copy:
     src: "{{ vault_private_key_file }}"
-    dest: /opt/etc/vault/key.pem
+    dest: "{{ vault_config_dir }}/key.pem"
     mode: 0700
+    owner: "{{ vault_system_user }}"

@@ -6,12 +6,18 @@ hashicorp_vault_source: https://releases.hashicorp.com/vault/0.10.1/vault_0.10.1
 # Set to FQDN of the host. Optional
 # vault_hostname:
 
+# Vault configuration directory
+vault_config_dir: /etc/vault/
+
 # Enable TLS on Vault API
 vault_tls_enabled: True
 # Certificate location on local system
 vault_certificate_file: "{{ ansible_env.HOME }}/.ssh/cert.pem"
 # Private key location on local system
 vault_private_key_file: "{{ ansible_env.HOME }}/.ssh/key.pem"
+
+# Vault backend type
+vault_storage_backend: filesystem
 
 # Backend database source
 aws_bucket_name: "changeme"
@@ -22,9 +28,14 @@ aws_region: "changeme"
 # AWS secret key. Optional if IAM role is used on ec2
 # aws_secret_key: ""
 
+# Directory for filesystem backend
+filesystem_backend_dir: /var/vault/
+
 # IP address of the vault
 vault_address: 0.0.0.0
 # Local port of the vault
 vault_port: 8200
 # Local vault user
-vault_user: vault
+vault_system_user: vault
+# Local vault group
+vault_system_group: vault

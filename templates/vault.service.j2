@@ -4,10 +4,10 @@ Requires=network-online.target
 After=network-online.target
 
 [Service]
-User={{ vault_user }}
+User={{ vault_system_user }}
 Restart=on-failure
-WorkingDirectory=/opt/etc/vault/
-ExecStart=/usr/local/sbin/vault server -config=/opt/etc/vault/service.hcl
+WorkingDirectory={{ vault_config_dir }}
+ExecStart=/usr/local/sbin/vault server -config={{ vault_config_dir }}/service.hcl
 
 [Install]
 WantedBy=multi-user.target
